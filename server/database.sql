@@ -1,6 +1,6 @@
 -- Create database
-CREATE DATABASE IF NOT EXISTS railway;
-USE railway;
+CREATE DATABASE IF NOT EXISTS fitverse;
+USE fitverse;
 
 -- Users table (for authentication)
 CREATE TABLE IF NOT EXISTS users (
