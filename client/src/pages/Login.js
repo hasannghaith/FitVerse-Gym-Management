@@ -2,119 +2,111 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = ({ onLogin }) => {
-  const [state, setState] = useState({ 
-    username: "", 
-    password: "" 
-  });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleChange = e => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setState({ ...state, [name]: value });
-    setError(""); // Clear error when user types
-  };
-
   const navigate = useNavigate();
+
+  const [state, setState] = useState({
+    username: "",
+    password: "",
+    error: "",
+    loading: false,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    // ✅ FIX: correct spread
+    setState((prev) => ({ ...prev, [name]: value, error: "" }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
+
+    setState((prev) => ({ ...prev, loading: true, error: "" }));
 
     try {
-      const result = await onLogin(state.username, state.password);
-      
-      if (result.success) {
-        // Login successful
-        if (result.userType === "admin") {
-          navigate('/admin');
-        } else {
-          navigate('/services');
-        }
+      // ✅ Send as object (matches updated App.js handleLogin)
+      const result = await onLogin({
+        username: state.username,
+        password: state.password,
+      });
+
+      if (result?.success) {
+        // If admin, go to admin dashboard, else go to home
+        if (result.userType === "admin") navigate("/admin");
+        else navigate("/");
       } else {
-        setError(result.message || "Invalid credentials");
+        setState((prev) => ({
+          ...prev,
+          error: result?.message || "Invalid credentials",
+          loading: false,
+        }));
       }
     } catch (err) {
-      setError("Server error. Please try again.");
-      console.error("Login error:", err);
-    } finally {
-      setIsLoading(false);
+      console.error("LOGIN PAGE ERROR:", err);
+      setState((prev) => ({
+        ...prev,
+        error: "Server error",
+        loading: false,
+      }));
     }
-    
-    setState({ username: "", password: "" });
   };
 
   return (
-    <div className="bg-black min-h-screen flex justify-center items-center p-4 pt-28">
-      <div className="bg-gray-800 text-white p-8 rounded-2xl shadow-lg max-w-md w-full">
-        <h2 className="text-3xl font-bold mb-6 text-center">Login to FitVerse</h2>
+    <div className="bg-black min-h-screen flex flex-col justify-center items-center px-4">
+      <div className="bg-gray-900 p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h1 className="text-3xl font-bold text-white text-center mb-6">Login</h1>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-900 rounded-lg">
-            <p className="text-red-200 text-center">{error}</p>
+        {state.error && (
+          <div className="bg-red-500 text-white p-3 rounded mb-4 text-center">
+            {state.error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-semibold mb-2">Username</label>
+            <label className="block text-white mb-2">Username</label>
             <input
-              name="username"
               type="text"
-              placeholder="Enter username"
+              name="username"
               value={state.username}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00df9a]"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-[#00df9a]"
+              placeholder="Enter username"
               required
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-semibold mb-2">Password</label>
+            <label className="block text-white mb-2">Password</label>
             <input
-              name="password"
               type="password"
-              placeholder="Enter password"
+              name="password"
               value={state.password}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00df9a]"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-[#00df9a]"
+              placeholder="Enter password"
               required
             />
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
-            className={`w-full bg-[#00df9a] text-black font-bold py-3 rounded-lg hover:bg-[#00c785] transition ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            disabled={state.loading}
+            className={`w-full font-bold py-2 px-4 rounded-lg transition duration-300 ${
+              state.loading
+                ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                : "bg-[#00df9a] text-black hover:bg-[#00c785]"
+            }`}
           >
-            {isLoading ? "Logging in..." : "Login"}
+            {state.loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-gray-900 rounded-lg">
-          <p className="text-sm text-center text-gray-300 mb-2">
-            Demo Credentials:
+        <div className="mt-6 text-gray-300 text-sm">
+          <p className="mb-1">
+            <span className="text-white font-semibold">Admin:</span> admin / admin123
           </p>
-          <div className="text-sm space-y-2">
-            <div className="flex justify-between items-center p-2 bg-gray-800 rounded">
-              <span><strong>Admin:</strong> admin / admin123</span>
-              <span className="text-[#00df9a] text-xs">Dashboard Only</span>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-gray-800 rounded">
-              <span><strong>User:</strong> user / user123</span>
-              <span className="text-[#00df9a] text-xs">Full Website Access</span>
-            </div>
-          </div>
-          <p className="text-xs text-center mt-3 text-gray-400">
-            Admin can only access Dashboard. User can access all shopping features.
-          </p>
-        </div>
-
-        <div className="mt-4 p-3 bg-blue-900 rounded-lg">
-          <p className="text-sm text-center text-blue-200">
-            🔒 Login required to access Services, Equipment, and Cart features
+          <p>
+            <span className="text-white font-semibold">User:</span> user / user123
           </p>
         </div>
       </div>

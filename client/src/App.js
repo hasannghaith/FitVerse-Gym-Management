@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from "axios";
 
-import NavBar from "./components/NavBar";
-import Intro from "./components/Intro";
-
+import NavBar from "./Components/NavBar";
+import Intro from "./Components/Intro";
 import About from "./pages/About";
 import Services from "./pages/Services";
 import Equipments from "./pages/Equipments";
@@ -57,9 +56,27 @@ function App() {
   /* ===========================
      AUTH
   =========================== */
-  const handleLogin = (userData) => {
-    setUser(userData);
-  };
+ const handleLogin = async ({ username, password }) => {
+  try {
+    const res = await axios.post("http://localhost:5000/api/login", {
+      username,
+      password,
+    });
+
+    if (res.data.success) {
+      setUser(res.data.user);
+      return { success: true, userType: res.data.user.UserType };
+    } else {
+      return { success: false, message: res.data.message };
+    }
+  } catch (err) {
+    console.error("LOGIN ERROR:", err.response || err);
+    return { success: false, message: "Server error" };
+  }
+};
+
+
+
 
   const handleLogout = () => {
     setUser(null);
@@ -99,8 +116,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Intro />} />
         <Route path="/about" element={<About />} />
-        <Route path="/services" element={<Services programs={programs} addToCart={addToCart} />} />
-        <Route path="/equipments" element={<Equipments products={products} addToCart={addToCart} />} />
+        <Route path="/services"element={<Services programs={programs} onAddToCart={addToCart} />}/>
+        <Route path="/equipments"element={<Equipments products={products} onAddToCart={addToCart} />}/>
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route
@@ -113,9 +130,10 @@ function App() {
             />
           }
         />
-        {user?.UserType === "admin" && (
-          <Route path="/admin" element={<AdminDashboard />} />
-        )}
+       {user?.UserType === "admin" && (
+       <Route path="/admin" element={<AdminDashboard user={user} />} />
+       )}
+
       </Routes>
     </Router>
   );

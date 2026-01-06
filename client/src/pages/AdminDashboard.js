@@ -16,7 +16,7 @@ const AdminDashboard = ({ user, products, programs }) => {
   const [newUser, setNewUser] = useState({ username: "", password: "", email: "", userType: "user" });
 
   useEffect(() => {
-    if (user?.type === "admin") {
+    if (user?.UserType === "admin") {
       fetchAdminData();
     }
   }, [user]);
@@ -86,7 +86,7 @@ const AdminDashboard = ({ user, products, programs }) => {
     setNewUser({ ...newUser, [name]: value });
   };
 
-  if (user?.type !== "admin") {
+ if (user?.UserType !== "admin") {
     return (
       <div className="bg-black min-h-screen text-white pt-28 px-6 md:px-12 flex items-center justify-center">
         <div className="text-center">

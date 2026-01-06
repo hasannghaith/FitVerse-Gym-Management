@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import image1 from "../assets/image1.jpg";
 import image2 from "../assets/image2.jpg";
 import image3 from "../assets/image3.jpg";
-import Typed from "react-typed";
+import { ReactTyped } from 'react-typed';
 import { Link } from "react-router-dom";
 
 const images = [image1, image2, image3];
@@ -39,7 +39,7 @@ const Intro = () => {
         </h1>
 
         <div className="font-bold text-xl text-[#00df9a] mb-6">
-          <Typed
+          <ReactTyped
             strings={["Transform Your Body Now"]}
             typeSpeed={50}
             backSpeed={50}
